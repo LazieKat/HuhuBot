@@ -1,3 +1,10 @@
+##############################################
+#               HuhuBot v1.0                 #
+#            github.com/aziad1998            #
+#  HuhuBot is a telegram bot I wrotefor fun  #
+#  For functionality send the command /help  #
+##############################################
+
 import json, requests, random
 import telegram as t
 import telegram.ext as te
@@ -6,30 +13,55 @@ import telegram.ext as te
 TOKEN = open("token", "r").read()
 
 #	global history array to save sent messages IDs
-history = [[],[]]
+history = dict()
 
 #	global variables for cards agains humanity
-cards_num = 0
+cards_num = dict()
 fulldeck = json.load(open("cah.json", "r"))
 black_cards = fulldeck["blackCards"]
 white_cards = fulldeck["whiteCards"]
 
-#	saving messages IDs from their returned info
-def saveHistory(msg_info):
-	history[0].append(msg_info['chat']['id'])
-	history[1].append(msg_info['message_id'])
-
-#	features testing function
-def test(bot: t.Bot, context: t.update):
-	rk = [["nibba", "human", "lol", "helicopter"]]
+#	dad jokes
+def dad(bot: t.Bot, context: t.update):
+	url = "https://icanhazdadjoke.com/slack"
+	response = requests.get(url).json()
+	joke = response['attachments'][0]['text']
 	msg_info = bot.send_message(
-		chat_id=context.message.chat_id, 
-		text="hello\nWhat's your religion", 
-		reply_markup=t.replykeyboardmarkup.ReplyKeyboardMarkup(rk, one_time_keyboard=True)
+		chat_id=ccid(context),
+		text=joke
 	)
 
 	saveHistory(msg_info)
-	print("test message sent", history[0][-1], history[1][-1], sep="\t")
+	cid = icid(msg_info)
+	print("dad joke sent", cid, history[cid][-1], sep="\t")
+
+#	get chat id from a message info
+def icid(msg_info):
+	return msg_info['chat']['id']
+
+def ccid(context: t.update):
+	return context.message.chat_id
+
+#	saving messages IDs from their returned info
+def saveHistory(msg_info):
+	cid = icid(msg_info)
+	while True:
+		try:
+			history[cid].append(msg_info['message_id'])
+			break
+		except KeyError:
+			history[cid] = list()
+
+#	features testing function
+def test(bot: t.Bot, context: t.update):
+	msg_info = bot.sendMessage(
+		chat_id=ccid(context),
+		text="test"
+	)
+
+	saveHistory(msg_info)
+	cid = icid(msg_info)
+	print("test message sent", cid, history[cid][-1], sep="\t")
 
 #	send cute anime girls pics
 def cute(bot: t.Bot, context: t.update):
@@ -37,17 +69,18 @@ def cute(bot: t.Bot, context: t.update):
 	response = requests.get(url).json()
 	img_url = response['data']['image']
 	msg_info = bot.send_photo(
-		chat_id=context.message.chat_id,
+		chat_id=ccid(context),
 		photo=img_url
 	)
 
 	saveHistory(msg_info)
-	print("moe photo sent", history[0][-1], history[1][-1], sep="\t")
+	cid = icid(msg_info)
+	print("moe photo sent", cid, history[cid][-1], sep="\t")
 
 #	remove last message in history array
 def rem(bot: t.Bot, context: t.update):
-	cid = history[0].pop()
-	mid = history[1].pop()
+	cid = ccid(context)
+	mid = history[cid].pop()
 	bot.delete_message(
 		chat_id=cid,
 		message_id=mid
@@ -57,43 +90,55 @@ def rem(bot: t.Bot, context: t.update):
 #	display help message of the bot	
 def help(bot: t.Bot, context: t.update):
 	msg_info = bot.send_message(
-		chat_id=context.message.chat_id,
+		chat_id=ccid(context),
 		text="Hi, I am HuhuBot\nThose are my commands so far\n"
 		"/help to display this message\n"
 		"/cute to send a cute girl pic\n"
 		"/rem to remove the last message I sent\n"
 		"/test is just for testing stuf\n"
+		"/cah play cards against humanity\n"
+		"/dad send a dad joke\n"
 	)
 
 	saveHistory(msg_info)
-	print("help message sent", history[0][-1], history[1][-1], sep="\t")
+	cid = icid(msg_info)
+	print("help message sent", cid, history[cid][-1], sep="\t")
 
 #	display a card against humanity 
 def cah(bot: t.Bot, context: t.update):
 	global cards_num
-	if cards_num == 0:
+	cid = ccid(context)
+	
+	#	check if this chat has been initilized to play cah
+	try:
+		cards_num[cid]
+	except KeyError:
+		cards_num[cid] = 0
+
+	#	what cards to send
+	if cards_num[cid] == 0:
 		card = int(random.randint(0,445000)/5000)
 		content = black_cards[card]["text"]
-		cards_num = black_cards[card]["pick"]
+		cards_num[cid] = black_cards[card]["pick"]
 		msg_info = bot.send_message(
-			chat_id=context.message.chat_id,
+			chat_id=cid,
 			text=content
 		)
 
 		saveHistory(msg_info)
-		print("black card sent", history[0][-1], history[1][-1], sep="\t")
+		print("black card sent", cid, history[cid][-1], sep="\t")
 	else:
-		for i in range(cards_num):
+		for i in range(cards_num[cid]):
 			card = int(random.randint(0,229500)/500)
 			content = white_cards[card]
 			msg_info = bot.send_message(
-				chat_id=context.message.chat_id,
+				chat_id=cid,
 				text=content
 			)
 
 			saveHistory(msg_info)
-			print("white card sent", history[0][-1], history[1][-1], sep="\t")
-		cards_num = 0
+			print("white card sent", cid, history[cid][-1], sep="\t")
+		cards_num[cid] = 0
 
 #	starting point
 if __name__ == "__main__":
@@ -124,6 +169,10 @@ if __name__ == "__main__":
 	cah_h = te.CommandHandler("cah", cah)
 	dispatcher.add_handler(cah_h)
 	print("/cah\tcommand handler created")
+
+	dad_h = te.CommandHandler("dad", dad)
+	dispatcher.add_handler(dad_h)
+	print("/dad\tcommand handler created")
 
 	#	start polling updates
 	updater.start_polling()
