@@ -1,13 +1,18 @@
 ##############################################
-#               HuhuBot v1.0                 #
+#               HuhuBot v1.2                 #
 #            github.com/aziad1998            #
 #  HuhuBot is a telegram bot I wrotefor fun  #
 #  For functionality send the command /help  #
 ##############################################
 
-import json, requests, random
+
+import random, jsonUrl, redditParser
 import telegram as t
 import telegram.ext as te
+
+
+################# Coniguration and generic funcs
+
 
 #	open bot token file
 TOKEN = open("token", "r").read()
@@ -15,35 +20,16 @@ TOKEN = open("token", "r").read()
 #	global history array to save sent messages IDs
 history = dict()
 
-#	global variables for cards agains humanity
-cards_num = dict()
-fulldeck = json.load(open("cah.json", "r"))
-black_cards = fulldeck["blackCards"]
-white_cards = fulldeck["whiteCards"]
-
-#	dad jokes
-def dad(bot: t.Bot, context: t.update):
-	url = "https://icanhazdadjoke.com/slack"
-	response = requests.get(url).json()
-	joke = response['attachments'][0]['text']
-	msg_info = bot.send_message(
-		chat_id=ccid(context),
-		text=joke
-	)
-
-	saveHistory(msg_info)
-	cid = icid(msg_info)
-	print("dad joke sent", cid, history[cid][-1], sep="\t")
-
 #	get chat id from a message info
 def icid(msg_info):
 	return msg_info['chat']['id']
 
+#	fet chat id from context
 def ccid(context: t.update):
 	return context.message.chat_id
 
 #	saving messages IDs from their returned info
-def saveHistory(msg_info):
+def saveHistory(msg_info, log: str):
 	cid = icid(msg_info)
 	while True:
 		try:
@@ -51,59 +37,93 @@ def saveHistory(msg_info):
 			break
 		except KeyError:
 			history[cid] = list()
-
-#	features testing function
-def test(bot: t.Bot, context: t.update):
-	msg_info = bot.sendMessage(
-		chat_id=ccid(context),
-		text="test"
-	)
-
-	saveHistory(msg_info)
-	cid = icid(msg_info)
-	print("test message sent", cid, history[cid][-1], sep="\t")
-
-#	send cute anime girls pics
-def cute(bot: t.Bot, context: t.update):
-	url = "http://api.cutegirls.moe/json"
-	response = requests.get(url).json()
-	img_url = response['data']['image']
-	msg_info = bot.send_photo(
-		chat_id=ccid(context),
-		photo=img_url
-	)
-
-	saveHistory(msg_info)
-	cid = icid(msg_info)
-	print("moe photo sent", cid, history[cid][-1], sep="\t")
+	print(log, "sent", cid, history[cid][-1], sep="\t")
 
 #	remove last message in history array
 def rem(bot: t.Bot, context: t.update):
 	cid = ccid(context)
 	mid = history[cid].pop()
-	bot.delete_message(
+	bot.deleteMessage(
 		chat_id=cid,
 		message_id=mid
 	)
-	print("message deleted", cid, mid, sep="\t")
+	print("message deleted\t", cid, mid, sep="\t")
 
-#	display help message of the bot	
-def help(bot: t.Bot, context: t.update):
-	msg_info = bot.send_message(
+
+################# Bot commands' funcs
+
+
+#	send a shower thought
+def shower(bot: t.Bot, context: t.update):
+	sentence = redditParser.random("Showerthoughts", redditParser.TEXT)
+	msg_info = bot.sendMessage(
 		chat_id=ccid(context),
-		text="Hi, I am HuhuBot\nThose are my commands so far\n"
-		"/help to display this message\n"
-		"/cute to send a cute girl pic\n"
-		"/rem to remove the last message I sent\n"
-		"/test is just for testing stuf\n"
-		"/cah play cards against humanity\n"
-		"/dad send a dad joke\n"
+		text=sentence
 	)
 
-	saveHistory(msg_info)
-	cid = icid(msg_info)
-	print("help message sent", cid, history[cid][-1], sep="\t")
+	saveHistory(msg_info, "Shower thought")
 
+#	send a pun
+def pun(bot: t.Bot, context: t.update):
+	img_url = redditParser.random("puns", redditParser.IMAGE)
+	msg_info = bot.sendPhoto(
+		chat_id=ccid(context),
+		photo=img_url
+	)
+
+	saveHistory(msg_info, "Pun")
+
+#	send a meme
+def meme(bot: t.Bot, context: t.update):
+	sub_name = "memes"
+	if random.randint(1,2) == 2:
+		sub_name = "dankmemes"
+	img_url = redditParser.random(sub_name, redditParser.IMAGE)
+	msg_info = bot.sendPhoto(
+		chat_id=ccid(context),
+		photo=img_url
+	)
+
+	saveHistory(msg_info, "Meme")
+
+#	two sentence horror
+def hor(bot: t.Bot, context: t.update):
+	sentence = redditParser.random("TwoSentenceHorror", redditParser.TEXT)
+	msg_info = bot.sendMessage(
+		chat_id=ccid(context),
+		text=sentence
+	)
+
+	saveHistory(msg_info, "TwoSentenceHorror")
+
+#	dad jokes
+def dad(bot: t.Bot, context: t.update):
+	joke = redditParser.random("dadjokes", redditParser.TEXT)
+	msg_info = bot.sendMessage(
+		chat_id=ccid(context),
+		text=joke
+	)
+
+	saveHistory(msg_info, "dad joke")
+
+
+#	send cute anime girls pics
+def cute(bot: t.Bot, context: t.update):
+	url = "http://api.cutegirls.moe/json"
+	response = jsonUrl.load(url)
+	img_url = response['data']['image']
+	msg_info = bot.sendPhoto(
+		chat_id=ccid(context),
+		photo=img_url
+	)
+
+	saveHistory(msg_info, "cute photo")
+
+#	global variables for cards agains humanity
+cards_num = dict()
+fulldeck = jsonUrl.readFile("cah.json", "r")
+black_cards = fulldeck["blackCards"]
+white_cards = fulldeck["whiteCards"]
 #	display a card against humanity 
 def cah(bot: t.Bot, context: t.update):
 	global cards_num
@@ -120,27 +140,47 @@ def cah(bot: t.Bot, context: t.update):
 		card = int(random.randint(0,445000)/5000)
 		content = black_cards[card]["text"]
 		cards_num[cid] = black_cards[card]["pick"]
-		msg_info = bot.send_message(
+		msg_info = bot.sendMessage(
 			chat_id=cid,
 			text=content
 		)
 
-		saveHistory(msg_info)
-		print("black card sent", cid, history[cid][-1], sep="\t")
+		saveHistory(msg_info, "black card")
 	else:
 		for i in range(cards_num[cid]):
 			card = int(random.randint(0,229500)/500)
 			content = white_cards[card]
-			msg_info = bot.send_message(
+			msg_info = bot.sendMessage(
 				chat_id=cid,
 				text=content
 			)
 
-			saveHistory(msg_info)
-			print("white card sent", cid, history[cid][-1], sep="\t")
+			saveHistory(msg_info, "white card")
 		cards_num[cid] = 0
 
-#	starting point
+#	display help message of the bot	
+def help(bot: t.Bot, context: t.update):
+	msg_info = bot.sendMessage(
+		chat_id=ccid(context),
+		text="Hi, I am HuhuBot 1.2"
+		"\nThose are my commands:\n"
+		"/help to display this message\n"
+		"/rem to remove the last message sent\n"
+		"/cute to send a cute girl pic\n"
+		"/cah play cards against humanity\n"
+		"/dad send a dad joke\n"
+		"/meme send a meme\n"
+		"/hor send a two sentence horror\n"
+		"/shower send a shower thought\n"
+		"/pun send a pun photo\n"
+	)
+
+	saveHistory(msg_info, "help message")
+
+
+################# Starting point
+
+
 if __name__ == "__main__":
 	#	create updater and dispatcher objects
 	print("Bot is starting up...")
@@ -150,10 +190,6 @@ if __name__ == "__main__":
 	print("dispatcher object created\n")
 
 	#	create commands handlers
-	test_h = te.CommandHandler("test", test)
-	dispatcher.add_handler(test_h)
-	print("/test\tcommand handler created")
-
 	help_h = te.CommandHandler("help", help)
 	dispatcher.add_handler(help_h)
 	print("/help\tcommand handler created")
@@ -173,6 +209,22 @@ if __name__ == "__main__":
 	dad_h = te.CommandHandler("dad", dad)
 	dispatcher.add_handler(dad_h)
 	print("/dad\tcommand handler created")
+
+	hor_h = te.CommandHandler("hor", hor)
+	dispatcher.add_handler(hor_h)
+	print("/hor\tcommand handler created")
+
+	meme_h = te.CommandHandler("meme", meme)
+	dispatcher.add_handler(meme_h)
+	print("/meme\tcommand handler created")
+
+	pun_h = te.CommandHandler("pun", pun)
+	dispatcher.add_handler(pun_h)
+	print("/pun\tcommand handler created")
+
+	shower_h = te.CommandHandler("shower", shower)
+	dispatcher.add_handler(shower_h)
+	print("/shower\tcommand handler created")
 
 	#	start polling updates
 	updater.start_polling()
