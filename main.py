@@ -173,9 +173,44 @@ def help(bot: t.Bot, context: t.update):
 		"/hor send a two sentence horror\n"
 		"/shower send a shower thought\n"
 		"/pun send a pun photo\n"
+		"/reddit <subreddit> <image/text> send a random post from the selected subreddit"
 	)
 
 	saveHistory(msg_info, "help message")
+
+#	selective reddit parser
+def reddit(bot: t.Bot, context: t.update, args):
+	cid = ccid(context)
+
+	params = []
+	for arg in args:
+		params.append(arg)
+	try:
+		params[1]
+	except IndexError:
+		params.append(None)
+
+	s_name = str(params[0]).lower()
+
+	if str(params[1]).lower() == "image" or str(params[1]).lower() == "photo":
+		parse_type = redditParser.IMAGE
+	elif str(params[1]).lower() == "text":
+		parse_type = redditParser.TEXT
+	else:
+		parse_type = redditParser.TITLE
+	request = redditParser.random(sub_name=s_name, type=parse_type)
+
+	if parse_type == redditParser.IMAGE:
+		msg_info = bot.sendPhoto(
+			chat_id=cid,
+			photo=request
+		)
+	else:
+		msg_info = bot.sendMessage(
+			chat_id=cid,
+			text=request
+		)	
+	saveHistory(msg_info, "selective reddit")
 
 
 ################# Starting point
@@ -225,6 +260,10 @@ if __name__ == "__main__":
 	shower_h = te.CommandHandler("shower", shower)
 	dispatcher.add_handler(shower_h)
 	print("/shower\tcommand handler created")
+
+	reddit_h = te.CommandHandler("reddit", reddit, pass_args=True)
+	dispatcher.add_handler(reddit_h)
+	print("/reddit\tcommand handler created")
 
 	#	start polling updates
 	updater.start_polling()
