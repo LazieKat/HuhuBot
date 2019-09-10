@@ -25,7 +25,7 @@ def random(sub_name=None, type=TITLE):
 	elif "r\\" in sub_name:
 		sub_name = sub_name.replace("r\\", "")
 
-	url = "https://www.reddit.com/r/" + sub_name + "/.json"
+	url = "https://www.reddit.com/r/" + sub_name + "/.json?limit=100"
 	data = jsonUrl.load(url)
 
 	dist = data["data"]["dist"]
