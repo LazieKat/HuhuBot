@@ -20,6 +20,9 @@ TOKEN = open("token", "r").read()
 #	global history array to save sent messages IDs
 history = dict()
 
+#	global counter for video sending
+sentVideoCounter = 0
+
 #	get chat id from a message info
 def icid(msg_info):
 	return msg_info['chat']['id']
@@ -196,15 +199,26 @@ def reddit(bot: t.Bot, context: t.update, args):
 		parse_type = redditParser.IMAGE
 	elif str(params[1]).lower() == "text":
 		parse_type = redditParser.TEXT
+	elif str(params[1]).lower() == "video":
+		parse_type = redditParser.VIDEO
 	else:
 		parse_type = redditParser.TITLE
-	request = redditParser.random(sub_name=s_name, type=parse_type)
+	if parse_type == redditParser.VIDEO:
+		request = redditParser.random(sub_name=s_name, type=parse_type, videoName=sentVideoCounter)
+	else:
+		request = redditParser.random(sub_name=s_name, type=parse_type)
 
 	if parse_type == redditParser.IMAGE:
 		msg_info = bot.sendPhoto(
 			chat_id=cid,
 			photo=request
 		)
+	# TODO	Know how to send a local video, for now, the video downloads locally, but I have no idea how to send it using the bot.sendVideo function
+	#elif parse_type == redditParser.VIDEO:
+	#	msg_info = bot.sendVideo(
+	#		chat_id=cid,
+	#		video=request
+	#	)
 	else:
 		msg_info = bot.sendMessage(
 			chat_id=cid,
