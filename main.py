@@ -215,10 +215,9 @@ def reddit(bot: t.Bot, context: t.update, args):
 			photo=request
 		)
 	elif parse_type == redditParser.VIDEO:
-		print(request)
 		msg_info = bot.sendVideo(
 			chat_id=cid,
-			video=open(request, 're'),
+			video=open(request, 'rb'),
 			supports_streaming=True
 		)
 		sentVideoCounter += 1
