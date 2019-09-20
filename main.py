@@ -6,7 +6,7 @@
 ##############################################
 
 
-import random, jsonUrl, redditParser
+import random, jsonUrl, redditParser, os
 import telegram as t
 import telegram.ext as te
 
@@ -183,6 +183,7 @@ def help(bot: t.Bot, context: t.update):
 
 #	selective reddit parser
 def reddit(bot: t.Bot, context: t.update, args):
+	global sentVideoCounter
 	cid = ccid(context)
 
 	params = []
@@ -213,12 +214,15 @@ def reddit(bot: t.Bot, context: t.update, args):
 			chat_id=cid,
 			photo=request
 		)
-	# TODO	Know how to send a local video, for now, the video downloads locally, but I have no idea how to send it using the bot.sendVideo function
-	#elif parse_type == redditParser.VIDEO:
-	#	msg_info = bot.sendVideo(
-	#		chat_id=cid,
-	#		video=request
-	#	)
+	elif parse_type == redditParser.VIDEO:
+		print(request)
+		msg_info = bot.sendVideo(
+			chat_id=cid,
+			video=open(request, 're'),
+			supports_streaming=True
+		)
+		sentVideoCounter += 1
+		os.remove(request)
 	else:
 		msg_info = bot.sendMessage(
 			chat_id=cid,

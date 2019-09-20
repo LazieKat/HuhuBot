@@ -60,8 +60,8 @@ def parseRedditVideo(link: str, outPath: str):
 	audioFullLink = baseLink + '/' + audioPartialLink
 
 	tempDir = tempfile.gettempdir()
-	tempVideoFilepath = tempDir + '\\' + next(tempfile._get_candidate_names())
-	tempAudioFilepath = tempDir + '\\' + next(tempfile._get_candidate_names())
+	tempVideoFilepath = tempDir + '/' + next(tempfile._get_candidate_names())
+	tempAudioFilepath = tempDir + '/' + next(tempfile._get_candidate_names())
 
 	# Store the actual data in the temp directory
 	urllib.request.urlretrieve(highestVideoQualityFullLink, tempVideoFilepath)
@@ -122,7 +122,7 @@ def random(sub_name=None, type=TITLE, videoName=None):
 		#	This branch is unfinished
 		url = data["data"]["children"][rand]["data"]["permalink"]
 		url = "https://www.reddit.com" + url
-		videoName = str(videoName) + ".mp4"
+		videoName = str(videoName) + ".mkv"
 
 		a = parseRedditVideo(url, videoName)
 		if a == 0:
