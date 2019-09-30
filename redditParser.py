@@ -16,7 +16,6 @@ VIDEO = 3
 
 
 #	Function to download videos, originally written by @DarkPointer and edited by me
-
 def parseRedditVideo(link: str, outPath: str):
 	# Check the link to add the .json request
 	if link.endswith('/'):
@@ -89,10 +88,9 @@ def parseRedditVideo(link: str, outPath: str):
 
 	return 0 
 
-	
 
-
-def random(sub_name=None, type=None, videoName=None):
+#	A function to get a random post from a selected subreddit
+def random(sub_name=None, p_type=None, videoName=None):
 	if sub_name == None:
 		print("Error: no subreddit chosen")
 		return -1
@@ -111,44 +109,69 @@ def random(sub_name=None, type=None, videoName=None):
 
 	post = data["data"]["children"][rand]["data"]
 
-	if post["selftext"] != '':
-		a = data["data"]["children"][rand]["data"]["title"]
-		b = data["data"]["children"][rand]["data"]["selftext"]
-		a += ("\n\n" + b)
+	print(p_type)
+	
+	if p_type == None:
+		if post["selftext"] != '':
+			a = data["data"]["children"][rand]["data"]["title"]
+			b = data["data"]["children"][rand]["data"]["selftext"]
+			a += ("\n\n" + b)
 
+			returnValue = {"type": TEXT, "value": a}
+			return returnValue
+		else:
+			if post["is_video"]:
+				url = data["data"]["children"][rand]["data"]["permalink"]
+				url = "https://www.reddit.com" + url
+				videoName = str(videoName) + ".mkv"
+
+				a = parseRedditVideo(url, videoName)
+				if a == 0:
+					returnValue = {"type": VIDEO, "value": videoName}
+					return returnValue
+			else:
+				value = data["data"]["children"][rand]["data"]["url"]
+				returnValue = {"type": IMAGE, "value": value}
+				return returnValue
+
+	if p_type == TITLE:
+		return post["title"]
+	if p_type == TEXT:
+		i = 0
+		while post["selftext"] == '':
+			rand = int(r.randint(0, dist*5000)/5000)
+			post = data["data"]["children"][rand]["data"]
+			i += 1
+			if i == 500:
+				break
+		a = post["title"]
+		b = post["selftext"]
+		a += ("\n\n" + b)
 		returnValue = {"type": TEXT, "value": a}
 		return returnValue
-	else:
-		if post["is_video"]:
-			url = data["data"]["children"][rand]["data"]["permalink"]
-			url = "https://www.reddit.com" + url
-			videoName = str(videoName) + ".mkv"
-
-			a = parseRedditVideo(url, videoName)
-			if a == 0:
-				returnValue = {"type": VIDEO, "value": videoName}
-				return returnValue
-		else:
-			value = data["data"]["children"][rand]["data"]["url"]
-			returnValue = {"type": IMAGE, "value": value}
+	if p_type == IMAGE:
+		i = 0
+		while post["selftext"] != '' or post["is_video"]:
+			rand = int(r.randint(0, dist*5000)/5000)
+			post = data["data"]["children"][rand]["data"]
+			i += 1
+			if i == 500:
+				break
+		value = post["url"]
+		returnValue = {"type": IMAGE, "value": value}
+		return returnValue
+	if p_type == VIDEO:
+		i = 0
+		while not post["is_video"]:
+			rand = int(r.randint(0, dist*5000)/5000)
+			post = data["data"]["children"][rand]["data"]
+			i += 1
+			if i == 500:
+				break
+		url = post["permalink"]
+		url = "https://www.reddit.com" + url
+		videoName = str(videoName) + ".mkv"
+		a = parseRedditVideo(url, videoName)
+		if a == 0:
+			returnValue = {"type": VIDEO, "value": videoName}
 			return returnValue
-
-#	previous implementation ditched for easier user interaction
-#
-#	if type == TITLE:
-#		return data["data"]["children"][rand]["data"]["title"]
-#	if type == TEXT:
-#		a = data["data"]["children"][rand]["data"]["title"]
-#		b = data["data"]["children"][rand]["data"]["selftext"]
-#		a += ("\n\n" + b)
-#		return a
-#	if type == IMAGE:
-#		return data["data"]["children"][rand]["data"]["url"]
-#	if type == VIDEO:
-#		url = data["data"]["children"][rand]["data"]["permalink"]
-#		url = "https://www.reddit.com" + url
-#		videoName = str(videoName) + ".mkv"
-#	
-#		a = parseRedditVideo(url, videoName)
-#		if a == 0:
-#			return videoName

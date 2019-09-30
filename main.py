@@ -195,23 +195,23 @@ def reddit(bot: t.Bot, context: t.update, args):
 		params.append(None)
 
 	s_name = str(params[0]).lower()
+	p_type = params[1]
 
-#	previous implementation ditched for easier user interaction
-#
-#	if str(params[1]).lower() == "image" or str(params[1]).lower() == "photo":
-#		parse_type = redditParser.IMAGE
-#	elif str(params[1]).lower() == "text":
-#		parse_type = redditParser.TEXT
-#	elif str(params[1]).lower() == "video":
-#		parse_type = redditParser.VIDEO
-#	else:
-#		parse_type = redditParser.TITLE
-#	if parse_type == redditParser.VIDEO:
-#		request = redditParser.random(sub_name=s_name, type=parse_type, videoName=sentVideoCounter)
-#	else:
-#		request = redditParser.random(sub_name=s_name, type=parse_type)
+	if p_type == None:
+		request = redditParser.random(sub_name=s_name, p_type=None, videoName=sentVideoCounter)
+	elif str(p_type).lower() == "image" or str(params[1]).lower() == "photo":
+		parse_type = redditParser.IMAGE
+		request = redditParser.random(sub_name=s_name, p_type=parse_type)
+	elif str(p_type).lower() == "text":
+		parse_type = redditParser.TEXT
+		request = redditParser.random(sub_name=s_name, p_type=parse_type)
+	elif str(p_type).lower() == "video":
+		parse_type = redditParser.VIDEO
+		request = redditParser.random(sub_name=s_name, p_type=parse_type, videoName=sentVideoCounter)
+	else:
+		parse_type = redditParser.TITLE
+		request = redditParser.random(sub_name=s_name, p_type=parse_type)
 
-	request = redditParser.random(sub_name=s_name, videoName=sentVideoCounter)
 	parse_type = request["type"]
 	message = request["value"]
 
