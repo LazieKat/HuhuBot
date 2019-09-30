@@ -1,5 +1,5 @@
 ##############################################
-#               HuhuBot v1.2                 #
+#               HuhuBot v1.5                 #
 #            github.com/aziad1998            #
 #  HuhuBot is a telegram bot I wrotefor fun  #
 #  For functionality send the command /help  #
@@ -165,7 +165,7 @@ def cah(bot: t.Bot, context: t.update):
 def help(bot: t.Bot, context: t.update):
 	msg_info = bot.sendMessage(
 		chat_id=ccid(context),
-		text="Hi, I am HuhuBot 1.2"
+		text="Hi, I am HuhuBot 1.5"
 		"\nThose are my commands:\n"
 		"/help to display this message\n"
 		"/rem to remove the last message sent\n"
@@ -176,7 +176,7 @@ def help(bot: t.Bot, context: t.update):
 		"/hor send a two sentence horror\n"
 		"/shower send a shower thought\n"
 		"/pun send a pun photo\n"
-		"/reddit <subreddit> <image/text> send a random post from the selected subreddit"
+		"/reddit <subreddit> send a random post from the selected subreddit"
 	)
 
 	saveHistory(msg_info, "help message")
@@ -196,36 +196,42 @@ def reddit(bot: t.Bot, context: t.update, args):
 
 	s_name = str(params[0]).lower()
 
-	if str(params[1]).lower() == "image" or str(params[1]).lower() == "photo":
-		parse_type = redditParser.IMAGE
-	elif str(params[1]).lower() == "text":
-		parse_type = redditParser.TEXT
-	elif str(params[1]).lower() == "video":
-		parse_type = redditParser.VIDEO
-	else:
-		parse_type = redditParser.TITLE
-	if parse_type == redditParser.VIDEO:
-		request = redditParser.random(sub_name=s_name, type=parse_type, videoName=sentVideoCounter)
-	else:
-		request = redditParser.random(sub_name=s_name, type=parse_type)
+#	previous implementation ditched for easier user interaction
+#
+#	if str(params[1]).lower() == "image" or str(params[1]).lower() == "photo":
+#		parse_type = redditParser.IMAGE
+#	elif str(params[1]).lower() == "text":
+#		parse_type = redditParser.TEXT
+#	elif str(params[1]).lower() == "video":
+#		parse_type = redditParser.VIDEO
+#	else:
+#		parse_type = redditParser.TITLE
+#	if parse_type == redditParser.VIDEO:
+#		request = redditParser.random(sub_name=s_name, type=parse_type, videoName=sentVideoCounter)
+#	else:
+#		request = redditParser.random(sub_name=s_name, type=parse_type)
+
+	request = redditParser.random(sub_name=s_name, videoName=sentVideoCounter)
+	parse_type = request["type"]
+	message = request["value"]
 
 	if parse_type == redditParser.IMAGE:
 		msg_info = bot.sendPhoto(
 			chat_id=cid,
-			photo=request
+			photo=message
 		)
 	elif parse_type == redditParser.VIDEO:
 		msg_info = bot.sendVideo(
 			chat_id=cid,
-			video=open(request, 'rb'),
+			video=open(message, 'rb'),
 			supports_streaming=True
 		)
 		sentVideoCounter += 1
-		os.remove(request)
+		os.remove(message)
 	else:
 		msg_info = bot.sendMessage(
 			chat_id=cid,
-			text=request
+			text=message
 		)	
 	saveHistory(msg_info, "selective reddit")
 

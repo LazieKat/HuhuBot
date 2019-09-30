@@ -92,7 +92,7 @@ def parseRedditVideo(link: str, outPath: str):
 	
 
 
-def random(sub_name=None, type=TITLE, videoName=None):
+def random(sub_name=None, type=None, videoName=None):
 	if sub_name == None:
 		print("Error: no subreddit chosen")
 		return -1
@@ -109,21 +109,46 @@ def random(sub_name=None, type=TITLE, videoName=None):
 	dist = data["data"]["dist"]
 	rand = int(r.randint(0, dist*5000)/5000)
 
-	if type == TITLE:
-		return data["data"]["children"][rand]["data"]["title"]
-	if type == TEXT:
+	post = data["data"]["children"][rand]["data"]
+
+	if post["selftext"] != '':
 		a = data["data"]["children"][rand]["data"]["title"]
 		b = data["data"]["children"][rand]["data"]["selftext"]
 		a += ("\n\n" + b)
-		return a
-	if type == IMAGE:
-		return data["data"]["children"][rand]["data"]["url"]
-	if type == VIDEO:
-		#	This branch is unfinished
-		url = data["data"]["children"][rand]["data"]["permalink"]
-		url = "https://www.reddit.com" + url
-		videoName = str(videoName) + ".mkv"
 
-		a = parseRedditVideo(url, videoName)
-		if a == 0:
-			return videoName
+		returnValue = {"type": TEXT, "value": a}
+		return returnValue
+	else:
+		if post["is_video"]:
+			url = data["data"]["children"][rand]["data"]["permalink"]
+			url = "https://www.reddit.com" + url
+			videoName = str(videoName) + ".mkv"
+
+			a = parseRedditVideo(url, videoName)
+			if a == 0:
+				returnValue = {"type": VIDEO, "value": videoName}
+				return returnValue
+		else:
+			value = data["data"]["children"][rand]["data"]["url"]
+			returnValue = {"type": IMAGE, "value": value}
+			return returnValue
+
+#	previous implementation ditched for easier user interaction
+#
+#	if type == TITLE:
+#		return data["data"]["children"][rand]["data"]["title"]
+#	if type == TEXT:
+#		a = data["data"]["children"][rand]["data"]["title"]
+#		b = data["data"]["children"][rand]["data"]["selftext"]
+#		a += ("\n\n" + b)
+#		return a
+#	if type == IMAGE:
+#		return data["data"]["children"][rand]["data"]["url"]
+#	if type == VIDEO:
+#		url = data["data"]["children"][rand]["data"]["permalink"]
+#		url = "https://www.reddit.com" + url
+#		videoName = str(videoName) + ".mkv"
+#	
+#		a = parseRedditVideo(url, videoName)
+#		if a == 0:
+#			return videoName
