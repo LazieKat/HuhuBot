@@ -59,6 +59,7 @@ def rem(bot: t.Bot, context: t.update):
 #	send a shower thought
 def shower(bot: t.Bot, context: t.update):
 	sentence = redditParser.random("Showerthoughts", redditParser.TEXT)
+	sentence = sentence["value"]
 	msg_info = bot.sendMessage(
 		chat_id=ccid(context),
 		text=sentence
@@ -69,6 +70,7 @@ def shower(bot: t.Bot, context: t.update):
 #	send a pun
 def pun(bot: t.Bot, context: t.update):
 	img_url = redditParser.random("puns", redditParser.IMAGE)
+	img_url = img_url["value"]
 	msg_info = bot.sendPhoto(
 		chat_id=ccid(context),
 		photo=img_url
@@ -82,6 +84,7 @@ def meme(bot: t.Bot, context: t.update):
 	if random.randint(1,2) == 2:
 		sub_name = "dankmemes"
 	img_url = redditParser.random(sub_name, redditParser.IMAGE)
+	img_url = img_url["value"]
 	msg_info = bot.sendPhoto(
 		chat_id=ccid(context),
 		photo=img_url
@@ -92,6 +95,7 @@ def meme(bot: t.Bot, context: t.update):
 #	two sentence horror
 def hor(bot: t.Bot, context: t.update):
 	sentence = redditParser.random("TwoSentenceHorror", redditParser.TEXT)
+	sentence = sentence["value"]
 	msg_info = bot.sendMessage(
 		chat_id=ccid(context),
 		text=sentence
@@ -102,6 +106,7 @@ def hor(bot: t.Bot, context: t.update):
 #	dad jokes
 def dad(bot: t.Bot, context: t.update):
 	joke = redditParser.random("dadjokes", redditParser.TEXT)
+	joke = joke["value"]
 	msg_info = bot.sendMessage(
 		chat_id=ccid(context),
 		text=joke
