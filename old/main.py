@@ -11,8 +11,7 @@ import telegram as t
 import telegram.ext as te
 
 
-################# Coniguration and generic funcs
-
+################# Coniguration variables
 
 #	open bot token file
 TOKEN = open("token", "r").read()
@@ -22,6 +21,9 @@ history = dict()
 
 #	global counter for video sending
 sentVideoCounter = 0
+
+
+################# Coniguration and generic funcs
 
 #	get chat id from a message info
 def icid(msg_info):
@@ -42,6 +44,10 @@ def saveHistory(msg_info, log: str):
 			history[cid] = list()
 	print(log, "sent", cid, history[cid][-1], sep="\t")
 
+
+################# Bot commands' funcs
+
+
 #	remove last message in history array
 def rem(bot: t.Bot, context: t.update):
 	cid = ccid(context)
@@ -51,10 +57,6 @@ def rem(bot: t.Bot, context: t.update):
 		message_id=mid
 	)
 	print("message deleted\t", cid, mid, sep="\t")
-
-
-################# Bot commands' funcs
-
 
 #	send a shower thought
 def shower(bot: t.Bot, context: t.update):

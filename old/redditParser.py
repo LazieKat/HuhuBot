@@ -7,15 +7,9 @@ TEXT = 1
 IMAGE = 2
 VIDEO = 3
 
-#	A function that returns a random post from the home page of the desired sub reddit
-#	The function can return different types of data
-#	TITLE: returens a string containing the random post title
-#	TEXT: returns a string containing the random post title and text content if any
-#	IMAGE: returns a url for the image of the post, if there is no image a url to the post is returned
-#	VIDEO: downloads 
 
-
-#	Function to download videos, originally written by @DarkPointer and edited by me
+#	A function that download a redit video and combines it with its audio
+#	returns 1 on errors and 0 on success
 def parseRedditVideo(link: str, outPath: str):
 	# Check the link to add the .json request
 	if link.endswith('/'):
@@ -89,7 +83,12 @@ def parseRedditVideo(link: str, outPath: str):
 	return 0 
 
 
-#	A function to get a random post from a selected subreddit
+#	A function that returns a random post from the home page of the desired sub reddit
+#	The function can return different types of data
+#	TITLE: returens a string containing the random post title
+#	TEXT: returns a string containing the random post title and text content if any
+#	IMAGE: returns a url for the image of the post, if there is no image a url to the post is returned
+#	VIDEO: downloads 
 def random(sub_name=None, p_type=None, videoName=None):
 	if sub_name == None:
 		print("Error: no subreddit chosen")
@@ -109,8 +108,6 @@ def random(sub_name=None, p_type=None, videoName=None):
 
 	post = data["data"]["children"][rand]["data"]
 
-	print(p_type)
-	
 	if p_type == None:
 		if post["selftext"] != '':
 			a = data["data"]["children"][rand]["data"]["title"]
