@@ -1,4 +1,4 @@
-import jsonUrl, re, requests, tempfile, ffmpy, os
+import json, re, requests, tempfile, ffmpy, os
 import random as r
 import urllib.request
 
@@ -101,7 +101,17 @@ def random(sub_name=None, p_type=None, videoName=None):
 		sub_name = sub_name.replace("r\\", "")
 
 	url = "https://www.reddit.com/r/" + sub_name + "/.json?limit=100"
-	data = jsonUrl.load(url)
+
+	req = urllib.request.Request(
+		url,
+		data=None,
+		#	user agent to avoid erro 429
+		headers={
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+		}
+	)
+	response = urllib.request.urlopen(req)
+	data = json.loads(response.read())
 
 	dist = data["data"]["dist"]
 	rand = int(r.randint(0, dist*5000)/5000)

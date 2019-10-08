@@ -120,14 +120,16 @@ def selective_reddit(bot: t.Bot, context: t.update, args):
 		params.append(arg)
 	try:
 		params[1]
+		post_type = True
 	except IndexError:
-		params.append(None)
+		post_type = None
 
 	sub_name = str(params[0]).lower()
-	post_type = str(params[1]).lower()
+	if post_type == True:
+		post_type = str(params[1]).lower()
 
 	if post_type == None:
-		request = reddit.random(sub_name=sub_name, video_name=sent_video_count)
+		request = reddit.random(sub_name=sub_name, post_type=None, video_name=sent_video_count)
 	elif post_type == "image" or post_type == "photo":
 		request = reddit.random(sub_name=sub_name, post_type=reddit.IMAGE)
 	elif post_type == "text":
@@ -163,8 +165,8 @@ def selective_reddit(bot: t.Bot, context: t.update, args):
 #	cards agains humanity
 cards_num = dict()
 fulldeck = reqs.json_url("https://raw.githubusercontent.com/crhallberg/json-against-humanity/master/full.md.json")
-black_cards = fulldeck["blackCards"]
-white_cards = fulldeck["whiteCards"]
+black_cards = fulldeck["black"]
+white_cards = fulldeck["white"]
 
 def cah(bot: t.Bot, context: t.update):
 	global cards_num
@@ -176,8 +178,8 @@ def cah(bot: t.Bot, context: t.update):
 		cards_num[chat_id] = 0
 
 	if cards_num[chat_id] == 0:
-		card = int(reddit.r.randint(0, 445000)/5000)
-		content = black_cards[card]["text"]
+		card = int(reddit.r.randint(0, 1480500)/500)
+		content = str(black_cards[card]["text"]).replace("_", "___")
 		cards_num[chat_id] = black_cards[card]["pick"]
 		msg_info = bot.send_message(
 			chat_id=chat_id,
@@ -187,8 +189,8 @@ def cah(bot: t.Bot, context: t.update):
 		config.save_history(msg_info, "black card")
 	else:
 		for i in range(cards_num[chat_id]):
-			card = int(reddit.r.randint(0, 229500)/500)
-			content = white_cards[card]
+			card = int(reddit.r.randint(0, 4059000)/500)
+			content = white_cards[card]["text"]
 			msg_info = bot.send_message(
 				chat_id=chat_id,
 				text=content

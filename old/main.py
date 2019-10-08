@@ -6,9 +6,10 @@
 ##############################################
 
 
-import random, jsonUrl, redditParser, os
+import random, redditParser, os, json
 import telegram as t
 import telegram.ext as te
+import urllib.request as q
 
 
 ################# Coniguration variables
@@ -43,6 +44,22 @@ def saveHistory(msg_info, log: str):
 		except KeyError:
 			history[cid] = list()
 	print(log, "sent", cid, history[cid][-1], sep="\t")
+
+
+def load(url: str):
+	req = q.Request(
+		url,
+		data=None,
+		#	user agent to avoid erro 429
+		headers={
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+		}
+	)
+	response = q.urlopen(req)
+	return json.loads(response.read())
+
+def readFile(path: str, type: str):
+	return json.load(open(path, type))
 
 
 ################# Bot commands' funcs
@@ -120,7 +137,7 @@ def dad(bot: t.Bot, context: t.update):
 #	send cute anime girls pics
 def cute(bot: t.Bot, context: t.update):
 	url = "http://api.cutegirls.moe/json"
-	response = jsonUrl.load(url)
+	response = load(url)
 	img_url = response['data']['image']
 	msg_info = bot.sendPhoto(
 		chat_id=ccid(context),
@@ -131,7 +148,7 @@ def cute(bot: t.Bot, context: t.update):
 
 #	global variables for cards agains humanity
 cards_num = dict()
-fulldeck = jsonUrl.readFile("cah.json", "r")
+fulldeck = readFile("cah.json", "r")
 black_cards = fulldeck["blackCards"]
 white_cards = fulldeck["whiteCards"]
 #	display a card against humanity 

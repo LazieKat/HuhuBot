@@ -1,3 +1,9 @@
+###############################################
+#               HuhuBot v1.5.1                #
+#            github.com/aziad1998             #
+###############################################
+
+
 import config, commands
 import telegram as t
 import telegram.ext as te
@@ -16,7 +22,7 @@ def main():
 	print("/help\tcommand handler created")
 
 	start_h = te.CommandHandler("start", commands.help)
-	dispatcher.add_handler(help_h)
+	dispatcher.add_handler(start_h)
 	print("/start\tcommand handler created")
 
 	cute_h = te.CommandHandler("cute", commands.cute)
@@ -58,3 +64,7 @@ def main():
 	#	Start polling
 	updater.start_polling()
 	print("\npolling started\n_______________\n")
+
+
+if __name__ == "__main__":
+	main()
