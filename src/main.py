@@ -61,6 +61,10 @@ def main():
 	dispatcher.add_handler(reddit_h)
 	print("/reddit\tcommand handler created")
 
+	rvd_h = te.CommandHandler("rvd", commands.rvd, pass_args=True)
+	dispatcher.add_handler(rvd_h)
+	print("/rvd\tcommand handler created")
+
 	#	Start polling
 	updater.start_polling()
 	print("\npolling started\n_______________\n")

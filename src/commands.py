@@ -5,7 +5,7 @@ import config, reddit, reqs, os
 def help(bot: t.Bot, context: t.update):
 	msg_info = bot.send_message(
 		chat_id=config.chat_id(context=context),
-		text="Hi, I am HuhuBot 1.5.1"
+		text="Hi, I am HuhuBot 1.5.2"
 		"\nThose are my commands:\n"
 		"/help to display this message\n"
 		"/rem to remove the last message sent\n"
@@ -16,7 +16,8 @@ def help(bot: t.Bot, context: t.update):
 		"/hor send a two sentence horror\n"
 		"/shower send a shower thought\n"
 		"/pun send a pun photo\n"
-		"/reddit <subreddit> send a random post from the selected subreddit"
+		"/reddit <subreddit> send a random post from the selected subreddit\n"
+		"/rvd download a reddit video from link"
 	)
 
 	config.save_history(msg_info, "help message")
@@ -110,8 +111,37 @@ def cute(bot: t.Bot, context: t.update):
 	config.save_history(msg_info, "cute photo")
 
 
-#	selective reddit command
 sent_video_count = 0
+#	reddit video downloader
+def rvd(bot: t.Bot, context: t.update, args):
+	global sent_video_count
+
+	params = []
+	for arg in args:
+		params.append(arg)
+
+	url = params[0]
+	path= "./"+ str(sent_video_count) + ".mp4"
+	reddit.download_video(url, path)
+	
+	try:
+		video=open(path, "rb")
+		msg_info = bot.send_video(
+			chat_id=config.chat_id(context=context),
+			video=video,
+			supports_streaming=True
+		)
+
+		config.save_history(msg_info, "rvd")
+	except Exception as e:
+		print(f"{type(e).__name__}\t {e}")
+	finally:
+		sent_video_count += 1
+		video.close()
+		os.remove(path)
+
+
+#	selective reddit command
 def selective_reddit(bot: t.Bot, context: t.update, args):
 	global sent_video_count
 
@@ -146,13 +176,19 @@ def selective_reddit(bot: t.Bot, context: t.update, args):
 			photo=message
 		)
 	elif post_type == reddit.VIDEO:
-		msg_info = bot.send_video(
-			chat_id=config.chat_id(context=context),
-			video=open(message, "rb"),
-			supports_streaming=True
-		)
-		sent_video_count += 1
-		os.remove(message)
+		try:
+			video=open(path, "rb")
+			msg_info = bot.send_video(
+				chat_id=config.chat_id(context=context),
+				video=video,
+				supports_streaming=True
+			)
+		except Exception as e:
+			print(f"{type(e).__name__}\t {e}")
+		finally:
+			sent_video_count += 1
+			video.close()
+			os.remove(message)
 	else:
 		msg_info = bot.send_message(
 			chat_id=config.chat_id(context=context),
